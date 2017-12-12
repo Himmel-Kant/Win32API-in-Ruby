@@ -12,7 +12,7 @@ wndc = Win32API::WndClassEx.malloc
     wndc.hCursor = Win32API.LoadCursor(nil, 0x0000_7f00) # IDC_ARROW
     wndc.hbrBackground = Win32API.GetStockObject(0x0000_0000) # WHITE_BRUSH
     wndc.lpszMenuName = nil
-    wndc.lpszClassName = 'BUTTON' # somehow bug occurs in Unicode
+    wndc.lpszClassName = 'STATIC' # somehow bug occurs in Unicode
     wndc.hIconSm = Win32API.LoadIcon(nil, 0x0000_7f00)
 
 
@@ -26,7 +26,7 @@ atom = Win32API.RegisterClassExW(wndc.to_ptr)
 
 raise 'failed to register window class' if atom == 0
 
-hwnd = Win32API.CreateWindowExW(0, 'STATIC'.wchar_t, TEXT('Test'),
+hwnd = Win32API.CreateWindowExW(0, TEXT('STATIC'), TEXT('Test'),
     0x00c0_0000,
     200, 100, 300, 300, nil, nil,
     HInstance, nil)
