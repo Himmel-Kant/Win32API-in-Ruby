@@ -1,6 +1,6 @@
 require 'fiddle\import'
 
-module Win32API
+module WinAPI
     extend Fiddle::Importer
     dlload 'C:\Windows\System32\user32.dll', 'C:\Windows\System32\kernel32.dll',
         'C:\Windows\System32\gdi32.dll'
@@ -29,9 +29,7 @@ module Win32API
     typealias('LPSTARTUPINFO', 'void*')
     typealias('ATOM', 'WORD')
     typealias('WNDCLASSEX*', 'void*')
-    typealias('WNDPROC', 'LRESULT')
-
-
+    typealias('WNDPROC', 'LRESULT*')
 
     # Kernel32.dll
     extern('HMODULE GetModuleHandle(LPWSTR)')
@@ -42,13 +40,22 @@ module Win32API
     extern('ATOM RegisterClassExW(WNDCLASSEX*)')
     extern('void* CreateWindowExW(DWORD, LPWSTR, LPWSTR, DWORD, int, int, int, int, HWND, HANDLE, HINSTANCE, void*)')
     extern('BOOL ShowWindow(HWND, int)')
-    extern('LONG_PTR DefWindowProcW(HWND, UINT, WPARAM, LPARAM)')
-    extern('HANDLE LoadIcon(HINSTANCE, LPWSTR)')
-    extern('HANDLE LoadCursor(HINSTANCE, LPWSTR)')
-    extern('int GetClassName(HWND, char*, int)')
+    extern('HANDLE LoadIconW(HINSTANCE, LPWSTR)')
+    extern('HANDLE LoadCursorW(HINSTANCE, LPWSTR)')
+    extern('BOOL GetClassInfoW(HINSTANCE, LPWSTR, WNDCLASSEX*)')
+    extern('HANDLE LoadImageW(HINSTANCE, LPWSTR, UINT, int, int, UINT)') # will replace LoadIcon and LoadCursor
 
     # Gdi32.dll
     extern('HANDLE GetStockObject(int)')
+
+    def self.DefWindowProcW(*args)
+        func = Fiddle::Function.new(import_symbol('DefWindowProcW'),
+            [Fiddle::TYPE_VOIDP, -Fiddle::TYPE_INT, Fiddle::TYPE_UINTPTR_T, Fiddle::TYPE_INTPTR_T], Fiddle::TYPE_INTPTR_T)
+        if args.length == 0 then func.ptr
+        else func.call(*args) end
+    end
+
+
 
     StartupInfo = struct([
         'DWORD  cb',
@@ -88,7 +95,35 @@ module Win32API
 
 
     module Constants
-        HInstance = Win32API.GetModuleHandle(nil)
+        def self.MAKEINTRESOURCE(int)
+            Fiddle::Pointer.to_ptr(int)
+        end
+
+        HInstance       = WinAPI.GetModuleHandle(nil)
+
+        WS_OVERLAPPED   = 0x0000_0000
+        WS_CAPTION      = 0x00C0_0000
+        WS_SYSMENU      = 0x0008_0000
+        WS_THICKFRAME   = 0x0004_0000
+        WS_MINIMIZEBOX  = 0x0002_0000
+        WS_MAXIMIZEBOX  = 0x0001_0000
+
+        WS_OVERLAPPEDWINDOW   = WS_OVERLAPPED |
+                                WS_CAPTION |
+                                WS_SYSMENU |
+                                WS_THICKFRAME |
+                                WS_MINIMIZEBOX |
+                                WS_MAXIMIZEBOX
+
+        CW_USEDEFAULT   = -0x8000_0000
+        
+        CS_VREDRAW      = 0x0001
+        CS_HREDRAW      = 0x0002
+
+        IDI_APPLICATION = MAKEINTRESOURCE(0x7f00)
+        IDC_ARROW       = MAKEINTRESOURCE(0x7f00)
+
+        WHITE_BRUSH     = 0
     end
 end
 

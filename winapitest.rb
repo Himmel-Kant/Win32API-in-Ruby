@@ -1,39 +1,39 @@
 require_relative '.\loadAPI.rb'
 
-include Win32API::Constants
+include WinAPI::Constants
 
-wndc = Win32API::WndClassEx.malloc
-    wndc.cbSize = Win32API::WndClassEx.size
-    wndc.style = 0x0000_0002 | 0x0000_0001 # CS_HREDRAW, CS_VREDRAW
-    wndc.lpfnWndProc = Win32API.DefWindowProcW(HInstance, 0, 0, 0)
+wndc = WinAPI::WndClassEx.malloc
+    wndc.cbSize         = WinAPI::WndClassEx.size
+    wndc.style          = CS_HREDRAW | CS_VREDRAW
+    wndc.lpfnWndProc    = WinAPI.DefWindowProcW
     wndc.cbClsExtra, wndc.cbWndExtra = 0, 0
-    wndc.hInstance = HInstance
-    wndc.hIcon = Win32API.LoadIcon(nil, 0x0000_7f00) # IDI_APPLICATION
-    wndc.hCursor = Win32API.LoadCursor(nil, 0x0000_7f00) # IDC_ARROW
-    wndc.hbrBackground = Win32API.GetStockObject(0x0000_0000) # WHITE_BRUSH
-    wndc.lpszMenuName = nil
-    wndc.lpszClassName = 'STATIC' # somehow bug occurs in Unicode
-    wndc.hIconSm = Win32API.LoadIcon(nil, 0x0000_7f00)
+    wndc.hInstance      = HInstance
+    wndc.hIcon          = WinAPI.LoadIconW(nil, IDI_APPLICATION)
+    wndc.hCursor        = WinAPI.LoadCursorW(nil, IDC_ARROW)
+    wndc.hbrBackground  = WinAPI.GetStockObject(WHITE_BRUSH)
+    wndc.lpszMenuName   = nil
+    wndc.lpszClassName  = TEXT('TESTCLASS')
+    wndc.hIconSm        = WinAPI.LoadIconW(nil, IDI_APPLICATION)
 
 
 
-startupInfo = Win32API::StartupInfo.malloc
-Win32API.GetStartupInfo(startupInfo.to_ptr)
+startupInfo = WinAPI::StartupInfo.malloc
+WinAPI.GetStartupInfo(startupInfo.to_ptr)
 
 nCmdShow = startupInfo.wShowWindow
 
-atom = Win32API.RegisterClassExW(wndc.to_ptr)
+atom = WinAPI.RegisterClassExW(wndc.to_ptr)
 
 raise 'failed to register window class' if atom == 0
 
-hwnd = Win32API.CreateWindowExW(0, TEXT('STATIC'), TEXT('Test'),
-    0x00c0_0000,
-    200, 100, 300, 300, nil, nil,
+hwnd = WinAPI.CreateWindowExW(0, TEXT('TESTCLASS'), TEXT('Test'),
+    WS_OVERLAPPEDWINDOW,
+    200, 100, CW_USEDEFAULT, 0, nil, nil,
     HInstance, nil)
 
 if !(hwnd.null?)
-    Win32API.ShowWindow(hwnd, nCmdShow)
-    Win32API.MessageBoxW(hwnd, TEXT('Hello, World!'), TEXT('Test'), 0)
+    WinAPI.ShowWindow(hwnd, nCmdShow)
+    WinAPI.MessageBoxW(hwnd, TEXT('Hello, World!'), TEXT('Test'), 0)
 else
     raise 'failed to create window'
 end

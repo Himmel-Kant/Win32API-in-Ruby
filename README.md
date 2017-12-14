@@ -1,1 +1,1 @@
-RubyでWin32API叩いて遊んでるだけのリポジトリ
+RubyでWindowsAPI叩いて遊んでるだけのリポジトリ
